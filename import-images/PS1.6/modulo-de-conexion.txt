@@ -1,8 +1,13 @@
 Módulo conexión local-online
 Del ERP local a la tienda online
 
-VL Motorsport - 31 de mayo de 2017Introducción
-Este módulo tiene por objetivo el intercambio de datos del sistema de gestión local hasta las diferentes tiendas online o sitios web y viceversa. Para ello, utilizará diferentes scripts personalizados y la automatización mediante tareas programadas o tareas CRON. 
+VL Motorsport - 31 de mayo de 2017
+
+Introducción
+
+Este módulo tiene por objetivo el intercambio de datos del sistema de gestión local hasta las diferentes tiendas online o sitios web y viceversa. Para ello, 
+utilizará diferentes scripts personalizados y la automatización mediante tareas programadas o tareas CRON. 
+
 EXPORTACIÓN de datos locales
 Primera parte del módulo: Exportación de datos desde el programa de gestión local NORAY (en adelante NORAY) a una carpeta de intercambio, externa a la propia estructura de Noray, en adelante WEB 2.
 Esta primera parte consta de varios script y sus correspondientes tareas programadas en el servidor local:
@@ -39,6 +44,3 @@ Para la ejecución de todos estos scripts se configuran tareas CRON en el servid
 La importación de imágenes debe completar las siguientes tareas:
 revisión de img existentes en la tienda, comparación con el listado de nuevas imgs, incorporación de imágenes no existentes y añadir img en productos que ya tengan alguna pero cuyos nombres no coincidan con la que se está importando. Todo que artículo no existente en la tienda, no se creará si existiera una imagen que le corresponda.
 La nomenclatura de las imágenes debe ser: 210600000-001.jpg, donde los primeros números es el código en NORAY (y por lo tanto, también el ID en la tienda) del artículo al que corresponde la foto. El texto despúes del guión es opcional, pudiendo ser números de serie o acotaciones de texto: perfil, frente, lateral, etc. Termina con la extensión del archivo.
-
-
-
