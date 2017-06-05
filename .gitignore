@@ -1,1 +1,5 @@
-images_backup/
+*images_backup/
+images_backup
+images_backup/*
+.idea
+*importa-img-configuracion.php
