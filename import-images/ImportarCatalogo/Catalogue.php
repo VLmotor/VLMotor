@@ -1,27 +1,13 @@
 <?php
-
-const REFERENCE_KEY = 'reference';
-const BRAND_KEY = 'brand';
-const MODEL_KEY = 'model';
-const FAMILY_KEY = 'family';
-const LINES_PER_FILE = 5000;
-
 ini_set('memory_limit', '512M');
 set_time_limit(24000);
 
-$root = getcwd() . '/../';
-if(empty($_REQUEST)) {
-    $root = getcwd() . '/httpdocs/';
-}
+include('./config.php');
 
-define('ROOT_DIR', $root);
-define('_PS_ADMIN_DIR_',  ROOT_DIR . '/admin367nyjlfd/');
-define('TARGET_DIR',  _PS_ADMIN_DIR_. '/import/');
-define('SCRIPT_ROOT', ROOT_DIR  . '/import/');
-define('CSV_FILE', SCRIPT_ROOT . 'combinations.csv');
+createConstants();
 
-require_once(ROOT_DIR . '/config/config.inc.php');
-require_once(ROOT_DIR . '/controllers/admin/AdminImportController.php');
+require_once(PS_ROOT_DIR . '/config/config.inc.php');
+require_once(PS_ROOT_DIR . '/controllers/admin/AdminImportController.php');
 
 $key_attribute_map = array(
     REFERENCE_KEY => 'Referencia',
@@ -48,110 +34,65 @@ function importCatalog($catalog) {
     }
 }
 
-/**
- * @return int|string
- */
-function findCategoryId()
-{
-    $categories = CategoryCore::searchByName(Configuration::get('PS_LANG_DEFAULT'), 'pastillas');
-    $id_category = 0;
-    if (!empty($categories)) {
-        $id_category = $categories[0]['id_category'];
-    }
-    return $id_category;
-}
+///**
+// * @return int|string
+// */
+//function findCategoryId()
+//{
+//    $categories = CategoryCore::searchByName(Configuration::get('PS_LANG_DEFAULT'), 'pastillas');
+//    $id_category = 0;
+//    if (!empty($categories)) {
+//        $id_category = $categories[0]['id_category'];
+//    }
+//    return $id_category;
+//}
+//
+//function findExistingReferences()
+//{
+//    $existing_references = findAllProductReferences();
+//    $references = array();
+//    foreach ($existing_references as $reference) {
+//        $references[$reference[REFERENCE_KEY]] = $reference['id_product'];
+//    }
+//
+//    return $references;
+//}
 
-function findExistingReferences()
-{
-    $existing_references = findAllProductReferences();
-    $references = array();
-    foreach ($existing_references as $reference) {
-        $references[$reference[REFERENCE_KEY]] = $reference['id_product'];
-    }
+///**
+// * @param $reference
+// * @return Created product
+// */
+//function createProduct($reference, &$reference_id_map, $id_category)
+//{
+//    $product = new Product();
+//    if(!$product->existsRefInDatabase($reference)) {
+//        $product = populateProduct($reference, $product, $id_category);
+//
+//        if($product->save()) {
+//            $reference_id_map[$reference] = $product->id;
+//        }
+//    } else {
+//        $product = findProductId($reference, $reference_id_map, $product);
+//    }
+//    return $product;
+//}
 
-    return $references;
-}
+//function findProductIdByReference($reference) {
+//    $row = Db::getInstance()->getRow('
+//		SELECT `id_product`
+//		FROM `'._DB_PREFIX_.'product` p
+//		WHERE p.reference = "'.pSQL($reference).'"');
+//
+//    return $row['id_product'];
+//}
 
-/**
- * @param $reference
- * @return Created product
- */
-function createProduct($reference, &$reference_id_map, $id_category)
-{
-    $product = new Product();
-    if(!$product->existsRefInDatabase($reference)) {
-        $product = populateProduct($reference, $product, $id_category);
-
-        if($product->save()) {
-            $reference_id_map[$reference] = $product->id;
-        }
-    } else {
-        $product = findProductId($reference, $reference_id_map, $product);
-    }
-    return $product;
-}
-
-/**
- * @param $reference
- * @param $reference_id_map
- * @param $product
- * @return mixed
- */
-function findProductId($reference, &$reference_id_map, &$product)
-{
-    if (array_key_exists($reference, $reference_id_map)) {
-        $product->id = $reference_id_map[$reference];
-    } else {
-        $product_id = findProductIdByReference($reference);
-        if ($product_id) {
-            $reference_id_map[$reference] = $product_id;
-            $product->id = $product_id;
-        }
-    }
-    return $product;
-}
-
-/**
- * @param $reference
- * @param $product
- */
-function populateProduct($reference, &$product, $id_category)
-{
-    $product->reference = $reference;
-    $product->price = (float)0;
-    $product->active = (int)1;
-    $product->weight = (float)0;
-    $product->minimal_quantity = (int)0;
-    $product->id_category = $id_category;
-    $product->id_category_default = $id_category;
-    $product->name[1] = utf8_encode($reference);
-    $product->link_rewrite[1] = Tools::link_rewrite($reference);
-    if (!isset($product->date_add) || empty($product->date_add)) {
-        $product->date_add = date('Y-m-d H:i:s');
-    }
-    $product->date_upd = date('Y-m-d H:i:s');
-    $product->save();
-    $product->addToCategories(array($id_category));
-
-    return $product;
-}
-
-function findProductIdByReference($reference) {
-    $row = Db::getInstance()->getRow('
-		SELECT `id_product`
-		FROM `'._DB_PREFIX_.'product` p
-		WHERE p.reference = "'.pSQL($reference).'"');
-
-    return $row['id_product'];
-}
-
-function findAllProductReferences() {
-    $rows = Db::getInstance()->executeS('
-		SELECT `reference`, `id_product`
-		FROM `'._DB_PREFIX_.'product` p', true, false);
-
-    return $rows;
-}
+//function findAllProductReferences() {
+//    $rows = Db::getInstance()->executeS('
+//		SELECT `reference`, `id_product`
+//		FROM `'._DB_PREFIX_.'product` p', true, false);
+//
+//    return $rows;
+//}
 
 /**
  * @param $product
@@ -192,7 +133,7 @@ function createCombinations($product_info, &$reference_id_map, $id_category)
 
     if($product_reference) {// front_side or back_side
         $reference = $product_reference;
-        $product = createProduct($reference, $reference_id_map, $id_category);
+        $product = createProduct($reference, $reference, $reference_id_map, $id_category);
         $product_id = $product->id;
 
         $i = 0;
@@ -287,85 +228,9 @@ function createCsvFiles($combinations)
  */
 function getCsvFilesPath($csvDirectoryName)
 {
-    return TARGET_DIR . '/' . $csvDirectoryName;
+    return ADMIN_IMPORT_DIR . '/' . $csvDirectoryName;
 }
 
-/**
- * @param $product_info
- * @param $product_id
- * @param $key_attribute_map
- * @param $reference
- * @param $out
- */
-/*
-function createProductCombination($product_info, $product_id, $key_attribute_map, $reference)
-{
-   $referenceCompoundMap = array();
-   $combinations = array();
-   // $referenceCompoundMap['reference] => array('compound1' => 'compound1', 'compound2' => 'compound2');
-   //$referenceCompoundMap = groupCompoundsByReferende($product_info, $reference, $referenceCompoundMap);
-   return $referenceCompoundMap;
-
-   $combinationLines = array();
-   foreach ($referenceCompoundMap as $groupReference => $groupCompounds) {
-       foreach ($groupCompounds as $compound) {
-           $i = 0;
-           $sideReference = $groupReference . $compound;
-           $attribute = 'compuesto:select:' . $i . ',';
-           $values = $compound . ':' . $i++ . ',';
-//        foreach ($product_info['attributes'] as $key => $value) {
-//            $attribute .= $key_attribute_map[$key] . ':select:' . $i . ', ';
-//            $values .= '"' . $value . '"' . ':' . $i++ . ', ';
-//        }
-
-           $combinations[$sideReference] = array($product_id,// Product ID*;
-               $groupReference,
-               $attribute,//$key_attribute_map[$key] . ':select:' . $i, // Attribute (Name:Type:Position)*;
-               $values,
-               $groupReference,// Supplier reference;
-               $sideReference,// Reference;
-               '',// EAN13;
-               '', // UPC;
-               '100',          // Wholesale price;
-               '40',           // Impact on price;
-               '0',            // Ecotax;
-               '10',           // Quantity;
-               '1',            // Minimal quantity;
-               '0',            // Impact on weight;
-               '0',            // Default (0 = No, 1 = Yes);
-               '2014-01-01'// Combination available date;
-           );
-       }
-   }
-
-   foreach ($combinations as $sideReference => $combination) {
-       $combinationLine = implode(';', $combination) . ";\n";
-       $combinationLines[$sideReference] = str_replace(',;', ';', $combinationLine);
-   }
-
-   return $combinationLines;
-}
-   */
-/**
- * @param $product_info
- * @param $reference
- * @param $referenceCompoundMap
- */
-/*
-function groupCompoundsByReferende($product_info, $reference, &$referenceCompoundMap)
-{
-   foreach ($product_info['compounds'] as $compound) {
-       if (!array_key_exists($reference, $referenceCompoundMap)) {
-           $referenceCompoundMap[$reference] = array();
-       }
-       if (!array_key_exists($compound, $referenceCompoundMap[$reference])) {
-           $referenceCompoundMap[$reference][$compound] = $compound;
-       }
-   }
-
-   return $referenceCompoundMap;
-}
-*/
 function importProducts()
 {
     $import = New AdminImportControllerCore();
@@ -415,18 +280,9 @@ function importProducts()
     }
 }
 
-/**
- * @param $string
- * @return string
- */
-function cleanString($string)
-{
-    return trim($string);
-}
-
 function createCombinationsCSV()
 {
-    if (($handle = fopen(SCRIPT_ROOT . "catalog.csv", "r")) !== FALSE) {
+    if (($handle = fopen(SCRIPT_IMPORT_DIR . "catalog.csv", "r")) !== FALSE) {
         $family = '';
         $compounds = array();
 
