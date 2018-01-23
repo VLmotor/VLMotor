@@ -4,8 +4,6 @@ set_time_limit(24000);
 
 include('./config.php');
 
-createConstants();
-
 require_once(PS_ROOT_DIR . '/config/config.inc.php');
 require_once(PS_ROOT_DIR . '/controllers/admin/AdminImportController.php');
 
@@ -202,7 +200,7 @@ function createCsvFiles($combinations)
         $combinationLines[] = str_replace(',;', ';', $combinationLine);
     }
 
-    var_dump($combinationLines);
+//    var_dump($combinationLines);
 
     foreach ($combinationLines as $combinationLine) {
         if ($i % LINES_PER_FILE == 0) {
@@ -272,10 +270,10 @@ function importProducts()
             $import->postProcess();
             gc_collect_cycles();
 
-            echo 'Borrando: ' . getCsvFilesPath(date('Ymd')) . '/' . $file_name;
-            if(!unlink(getCsvFilesPath(date('Ymd')) . '/' . $file_name)) {
-                echo 'No se pudo borrar ' . getCsvFilesPath(date('Ymd')) . '/' . $file_name;
-            }
+//            echo 'Borrando: ' . getCsvFilesPath(date('Ymd')) . '/' . $file_name;
+//            if(!unlink(getCsvFilesPath(date('Ymd')) . '/' . $file_name)) {
+//                echo 'No se pudo borrar ' . getCsvFilesPath(date('Ymd')) . '/' . $file_name;
+//            }
         }
     }
 }
